@@ -133,6 +133,11 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
+  }
+  a:focus-visible,
+  button:focus-visible {
+    @apply ring-ring/60 outline-none ring-[3px];
   }
   h1,
   h2,
@@ -141,5 +146,33 @@
   h5,
   h6 {
     @apply font-heading;
+  }
+}
+
+/* Gentle floating motion for the hero products; off for reduced motion. */
+@keyframes float-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.float-gentle {
+  animation: float-gentle 6s ease-in-out infinite;
+}
+
+.float-delay {
+  animation-delay: -3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .float-gentle {
+    animation: none;
   }
 }

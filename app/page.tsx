@@ -1,6 +1,8 @@
+import { Check, Minus } from "lucide-react";
 import Image from "next/image";
 import { SiteFooter } from "@/components/copper/site-footer";
 import { SiteHeader } from "@/components/copper/site-header";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -70,20 +72,43 @@ function Hero({ products }: { products: Product[] }) {
     <section
       id="top"
       data-testid="hero"
-      className="bg-secondary text-secondary-foreground scroll-mt-24"
+      className="bg-secondary text-secondary-foreground relative isolate scroll-mt-24 overflow-hidden"
     >
-      <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:py-20">
+      <div
+        aria-hidden="true"
+        className="from-primary/25 to-background absolute inset-0 -z-10 bg-gradient-to-b via-transparent"
+      />
+      <div
+        aria-hidden="true"
+        className="bg-primary/20 absolute top-1/2 right-0 -z-10 size-96 -translate-y-1/2 rounded-full blur-3xl md:right-10"
+      />
+      <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 py-12 md:grid-cols-2 md:py-24">
         <div className="text-center md:text-left">
+          <Badge className="mb-4 h-6 px-3 text-sm">New for 2026</Badge>
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
             Meet Copper Home and Copper Notes
           </h1>
           <p className="mt-4 text-xl sm:text-2xl">{TAGLINE}</p>
-          <Button asChild size="lg" className="mt-8 h-11 px-6 text-base">
-            <a href="#products">See products</a>
-          </Button>
+          <div className="mt-8 flex flex-wrap justify-center gap-3 md:justify-start">
+            <Button
+              asChild
+              size="lg"
+              className="h-11 px-6 text-base shadow-md transition-transform hover:-translate-y-0.5"
+            >
+              <a href="#products">See products</a>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="h-11 px-6 text-base transition-transform hover:-translate-y-0.5"
+            >
+              <a href="#plus">See plans</a>
+            </Button>
+          </div>
         </div>
         <div className="grid grid-cols-2 items-center gap-2 sm:gap-4">
-          {products.map((product) => (
+          {products.map((product, index) => (
             <Image
               key={product.id}
               src={product.cutout}
@@ -93,7 +118,10 @@ function Hero({ products }: { products: Product[] }) {
               sizes="(min-width: 768px) 25vw, 45vw"
               loading="eager"
               fetchPriority="high"
-              className="h-auto w-full"
+              className={cn(
+                "float-gentle h-auto w-full drop-shadow-xl",
+                index % 2 === 1 && "float-delay",
+              )}
             />
           ))}
         </div>
@@ -107,16 +135,18 @@ function ProductCard({ product }: { product: Product }) {
     <Card
       data-testid="product-card"
       data-product={product.id}
-      className="gap-4 p-6"
+      className="hover:ring-primary/40 gap-4 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
-      <Image
-        src={product.cutout}
-        alt={CUTOUT_ALT[product.id] ?? `${product.name} ${product.type}`}
-        width={1254}
-        height={1254}
-        sizes="(min-width: 768px) 40vw, 90vw"
-        className="mx-auto h-auto w-full max-w-xs"
-      />
+      <div className="bg-secondary rounded-2xl p-4">
+        <Image
+          src={product.cutout}
+          alt={CUTOUT_ALT[product.id] ?? `${product.name} ${product.type}`}
+          width={1254}
+          height={1254}
+          sizes="(min-width: 768px) 40vw, 90vw"
+          className="mx-auto h-auto w-full max-w-xs"
+        />
+      </div>
       <ul
         aria-label={`${product.name} finishes`}
         className="flex flex-wrap justify-center gap-4"
@@ -138,9 +168,12 @@ function ProductCard({ product }: { product: Product }) {
       <div className="text-center">
         <h3 className="text-2xl font-bold">{product.name}</h3>
         <p className="text-muted-foreground">{product.type}</p>
-        <p className="text-primary mt-1 text-3xl font-bold">
+        <Badge
+          variant="secondary"
+          className="text-primary mt-2 h-auto px-4 py-1 text-3xl font-bold"
+        >
           {formatUsd(product.priceUsd)}
-        </p>
+        </Badge>
       </div>
       <ul className="space-y-3">
         {product.features.slice(0, 3).map((feature) => (
@@ -197,11 +230,11 @@ function Showcase({ products }: { products: Product[] }) {
             return (
               <div
                 key={src}
-                className="grid items-center gap-6 md:grid-cols-2 md:gap-10"
+                className="group grid items-center gap-6 md:grid-cols-2 md:gap-10"
               >
                 <div
                   className={cn(
-                    "relative aspect-video overflow-hidden rounded-xl",
+                    "relative aspect-video overflow-hidden rounded-3xl shadow-lg",
                     index % 2 === 1 && "md:order-last",
                   )}
                 >
@@ -210,10 +243,10 @@ function Showcase({ products }: { products: Product[] }) {
                     alt={photo?.alt ?? `${product.name} in everyday use`}
                     fill
                     sizes="(min-width: 768px) 45vw, 100vw"
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
-                <div className="text-center md:text-left">
+                <div className="border-primary text-center md:border-l-4 md:pl-6 md:text-left">
                   <p className="text-primary text-sm font-semibold tracking-wide uppercase">
                     {product.name}
                   </p>
@@ -243,11 +276,18 @@ function PlanCard({ plan }: { plan: Plan }) {
     <Card
       data-plan={plan.id}
       className={cn(
-        "gap-6 p-6",
+        "gap-6 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl",
         isPlus && "bg-primary text-primary-foreground ring-primary ring-2",
       )}
     >
-      <h3 className="text-2xl font-bold">{plan.name}</h3>
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="text-2xl font-bold">{plan.name}</h3>
+        {isPlus && (
+          <Badge className="bg-primary-foreground text-primary h-6 px-3 text-sm">
+            Most popular
+          </Badge>
+        )}
+      </div>
       <dl className="space-y-3">
         {rows.map(([label, value]) => (
           <div
@@ -255,7 +295,15 @@ function PlanCard({ plan }: { plan: Plan }) {
             className="border-foreground/10 flex items-baseline justify-between gap-4 border-b pb-3 last:border-b-0 last:pb-0"
           >
             <dt className={isPlus ? "" : "text-muted-foreground"}>{label}</dt>
-            <dd className="text-right text-lg font-semibold">{value}</dd>
+            <dd className="flex items-center justify-end gap-2 text-right text-lg font-semibold">
+              {label === "Refined answers" &&
+                (value === "Included" ? (
+                  <Check aria-hidden="true" className="size-5" />
+                ) : (
+                  <Minus aria-hidden="true" className="size-5" />
+                ))}
+              {value}
+            </dd>
           </div>
         ))}
       </dl>
@@ -298,7 +346,7 @@ function Privacy() {
           width={1254}
           height={1254}
           sizes="(min-width: 768px) 25vw, 50vw"
-          className="mx-auto h-auto w-1/2 md:w-full"
+          className="bg-secondary/30 mx-auto h-auto w-1/2 rounded-full p-4 shadow-lg md:w-full"
         />
         <div>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -308,9 +356,18 @@ function Privacy() {
             How Copper handles what you say and record, under our{" "}
             {privacy.policy} policy.
           </p>
-          <ul className="mt-6 list-disc space-y-3 pl-5">
+          <ul className="mt-6 space-y-3">
             {privacy.points.map((point) => (
-              <li key={point}>{point}</li>
+              <li
+                key={point}
+                className="bg-background/15 flex gap-3 rounded-xl p-4"
+              >
+                <Check
+                  aria-hidden="true"
+                  className="mt-0.5 size-5 shrink-0"
+                />
+                <span>{point}</span>
+              </li>
             ))}
           </ul>
         </div>
